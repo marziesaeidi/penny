@@ -153,7 +153,7 @@ export function migrate(input: Data | FinanceData, at: string): FinanceData {
     folders: [], assets: [], obligations: [], installments: [], accountEntries: [],
     categoryRecords,
     monthlyBudgets: { [periodKey(canonicalDay(new Date(at)))]: structuredClone(input.budget) },
-    settings: { name: 'خرج‌نگار', theme: 'light', currency: 'IRT', timezone: 'Asia/Tehran' },
+    settings: { name: 'Penny', theme: 'light', currency: 'IRT', timezone: 'Asia/Tehran' },
     migrationWarnings: ['موجودی حساب‌ها و پس‌اندازهای قبلی به‌عنوان مبنای افتتاحیه حفظ شدند؛ تاریخچه قدیمی دوباره روی موجودی اعمال نشده است.', ...(input.loans.some(l => !isoDay(l.nextDate)) || input.recurring.some(r => !isoDay(r.nextDate)) ? ['بعضی سررسیدهای قدیمی سال ندارند؛ پیش از پرداخت دوره‌ای، تاریخ کامل را وارد کن.'] : []), ...(input.loans.length ? ['تفکیک اصل و سود وام‌های قدیمی معلوم نیست؛ مبلغ قراردادی بدون حدس حفظ شده است.'] : [])]
   };
   validate(result); return result;

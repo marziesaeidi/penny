@@ -30,7 +30,7 @@ export function Welcome() {
     {choice(<Users size={24}/>, 'ساخت فضای مشترک', 'برای خانواده یا هم‌خانه‌ها فضا بساز و با لینک دعوت، اعضا را اضافه کن.', () => setStep('household'))}
    </div></>}
   {step === 'household' && <><div className="access-icon"><Users/></div><span className="access-eyebrow">مرحلهٔ ۱ از ۲</span><h2 id="welcome-title">نام فضای مشترک</h2><p className="access-description">این نام برای همهٔ اعضا نمایش داده می‌شود و بعداً قابل تغییر است.</p>
-   <form onSubmit={e => { e.preventDefault(); void createHousehold(); }}><FormField label="نام فضا"><FieldInput autoFocus required maxLength={60} placeholder="مثلاً خرج‌نگار" value={name} onChange={e => setName(e.target.value)}/></FormField>
+   <form onSubmit={e => { e.preventDefault(); void createHousehold(); }}><FormField label="نام فضا"><FieldInput autoFocus required maxLength={60} placeholder="مثلاً Penny" value={name} onChange={e => setName(e.target.value)}/></FormField>
     <Action variant="default" className="primary full access-submit" disabled={busy || !name.trim()}>{busy ? 'در حال ساخت…' : 'ساخت فضای مشترک'}<ArrowLeft size={18}/></Action>
     <Action variant="outline" type="button" className="outline full" onClick={() => setStep('choose')}>بازگشت</Action></form></>}
   {step === 'invite' && space && <><div className="access-icon"><Link2/></div><span className="access-eyebrow">مرحلهٔ ۲ از ۲</span><h2 id="welcome-title">اعضا را دعوت کن</h2><p className="access-description">لینک را برای هر عضو بفرست. لینک یک‌بارمصرف است و ۷ روز اعتبار دارد؛ هر عضو پس از ورود یا ثبت‌نام درخواست می‌فرستد و تو آن را تأیید می‌کنی.</p>

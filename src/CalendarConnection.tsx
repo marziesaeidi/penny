@@ -54,7 +54,7 @@ export function CalendarConnection({ data, viewer, visible }: { data: FinanceDat
         const rows = dueItems(data, viewer).filter(row => row.reminderDays.length);
         for (const row of rows) {
           const key = `${row.kind}:${row.id}`;
-          const event = { summary: row.name, description: 'یادآوری خرج‌نگار', start: { dateTime: `${row.date}T09:00:00+03:30`, timeZone: 'Asia/Tehran' }, end: { dateTime: `${row.date}T09:15:00+03:30`, timeZone: 'Asia/Tehran' }, reminders: { useDefault: false, overrides: [...new Set(row.reminderDays.map(days => Math.min(40320, days * 1440)))].sort((a,b)=>a-b).slice(0,5).map(minutes => ({ method: 'popup', minutes })) }, extendedProperties: { private: { khaneh: marker, key } } };
+          const event = { summary: row.name, description: 'یادآوری Penny', start: { dateTime: `${row.date}T09:00:00+03:30`, timeZone: 'Asia/Tehran' }, end: { dateTime: `${row.date}T09:15:00+03:30`, timeZone: 'Asia/Tehran' }, reminders: { useDefault: false, overrides: [...new Set(row.reminderDays.map(days => Math.min(40320, days * 1440)))].sort((a,b)=>a-b).slice(0,5).map(minutes => ({ method: 'popup', minutes })) }, extendedProperties: { private: { khaneh: marker, key } } };
           const old = existing.get(key);
           const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(marker + ':' + key));
           const eventId = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');

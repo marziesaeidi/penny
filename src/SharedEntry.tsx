@@ -50,7 +50,7 @@ export function SpaceSwitcher({ beforeCreate }: { beforeCreate?: ReactNode } = {
    {session.spaces.map(s => <option key={s.id} value={s.id}>{label(s.kind, s.name)}</option>)}
   </FieldSelect>
   {beforeCreate}
-  {creating ? <form style={{ display: 'grid', gap: 8 }} onSubmit={e => { e.preventDefault(); void create(); }}><FieldInput aria-label="نام فضای مشترک" autoFocus required maxLength={60} placeholder="مثلاً خرج‌نگار" value={name} onChange={e => setName(e.target.value)}/><Action variant="default" className="primary small" disabled={busy || !name.trim()}>ساخت فضای مشترک</Action><Action variant="outline" type="button" className="outline small" onClick={() => setCreating(false)}>انصراف</Action></form>
+  {creating ? <form style={{ display: 'grid', gap: 8 }} onSubmit={e => { e.preventDefault(); void create(); }}><FieldInput aria-label="نام فضای مشترک" autoFocus required maxLength={60} placeholder="مثلاً Penny" value={name} onChange={e => setName(e.target.value)}/><Action variant="default" className="primary small" disabled={busy || !name.trim()}>ساخت فضای مشترک</Action><Action variant="outline" type="button" className="outline small" onClick={() => setCreating(false)}>انصراف</Action></form>
    : <Action variant="outline" className="outline small" onClick={() => setCreating(true)}><Plus size={16}/> فضای مشترک تازه</Action>}
 
   {error && <ErrorNotice message={error}/>}
