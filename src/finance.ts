@@ -3,7 +3,7 @@ import { money } from './utils';
 import { validateForeignExpense } from './foreignValidation';
 import type { FinanceData, Transaction, Loan, Installment } from './types';
 import { add, apportion, converted, decimal, integer, multiply, pricePerUnit, proportional, quantityAdd, split, sum } from './decimal';
-import { canonicalDay, isoDay, jalaliParts, nextDate } from './calendar';
+import { canonicalDay, isoDay, jalaliParts, nextDate, periodKey } from './calendar';
 
 export const active = (t: Transaction) => t.status !== 'reversed';
 export const allowed = (x: { visibility: string; owner?: string; createdBy?: string }, viewer: string) => x.visibility === 'shared' || (x.owner ?? x.createdBy) === viewer;
@@ -45,9 +45,11 @@ export function transactionCashDelta(t: Transaction, accountId: string): number 
   const cash = t.foreignExpense ? add(t.foreignExpense.debitMinor,t.foreignExpense.feeMinor) : t.allocationOnly ? 0 : add(t.amount, inflow ? -(t.fee ?? 0) : t.type === 'loan-payment' ? 0 : t.fee ?? 0);
   return accountId===t.accountId ? (inflow?cash:-cash) : accountId===t.toAccountId ? t.amount : 0;
 }
-export function accountExpenseTotal(transactions: Transaction[], accountId: string, viewer: string): number {
+export function accountExpenseTotal(transactions: Transaction[], accountId: string, viewer: string, day: string): number {
+  const month = periodKey(day);
   return sum(transactions
-    .filter(t => t.accountId === accountId && t.type === 'expense' && active(t) && allowed(t, viewer))
+    .filter(t => t.accountId === accountId && t.type === 'expense' && active(t) && allowed(t, viewer)
+      && t.date <= day && isoDay(t.date) && periodKey(t.date) === month)
     .map(t => transactionCashDelta(t, accountId)));
 }
 function effects(data: FinanceData, t: Transaction, direction: 1 | -1): FinanceData {

@@ -5,12 +5,12 @@ import { EditorForm } from './components/editor-form';
 import { FlowBack } from './components/flow-navigation';
 import { FieldSelect } from './components/finance-ui';
 import { accountExpenseTotal, active, allowed } from './finance';
-import { money, persianDate } from './utils';
+import { money, persianDate, today } from './utils';
 import { CollectionHeading } from './components/collection-heading';
 import { FormField } from './components/form-fields';
 import { useUIRequest } from './components/use-ui-request';
 import { Surface, FieldInput, Action } from './components/finance-ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { nativeMoney } from './currencies';
 import type { Account, FinanceData, Transaction } from './types';
 
@@ -20,9 +20,19 @@ export function removeAccount(data: FinanceData, id: string): FinanceData {
 }
 export function AccountManager({ data, viewer, change, onTransaction }: { onTransaction: (transaction: Transaction) => void; data: FinanceData; viewer: string; change: (d: FinanceData | ((d: FinanceData) => FinanceData)) => void }) {
  const [selected,setSelected]=useState('');const [showAll,setShowAll]=useState(false);
+ const [day,setDay]=useState(today);
+ useEffect(() => {
+  const refreshDay = () => setDay(today());
+  const timer = setInterval(refreshDay, 60_000);
+  document.addEventListener('visibilitychange', refreshDay);
+  return () => {
+   clearInterval(timer);
+   document.removeEventListener('visibilitychange', refreshDay);
+  };
+ }, []);
  const accounts=data.accounts.filter(a=>allowed(a,viewer)),account=accounts.find(a=>a.id===selected);
- const expenseText = (a: Account) => nativeMoney(accountExpenseTotal(data.transactions, a.id, viewer), a.currency??'IRT', data.currencyDefinitions);
- return account?<><FlowBack label="بازگشت به حساب‌ها" onBack={()=>setSelected('')}/><AccountEditor key={account.id+account.name} account={account} expenseText={expenseText(account)} change={change}/><Surface className="card module-card"><h2>{showAll?'همه تراکنش‌های این حساب':'تراکنش‌های اخیر این حساب'}</h2>{data.transactions.filter(t=>t.type!=='income'&&active(t)&&allowed(t,viewer)&&(t.accountId===account.id||t.toAccountId===account.id)).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,showAll?undefined:5).map(t=><Action type="button" variant="ghost" className="transaction-row" key={t.id} onClick={()=>onTransaction(t)}><span className="row-main"><strong title={t.title}>{t.title}</strong><small>{persianDate(t.date)}</small></span><span className="row-end"><strong>{money(t.amount)}</strong></span></Action>)}<Action type="button" variant="outline" className="full" onClick={()=>setShowAll(v=>!v)}>{showAll?'نمایش تراکنش‌های اخیر':'نمایش همه تراکنش‌های حساب'}</Action>{!data.transactions.some(t=>t.type!=='income'&&active(t)&&allowed(t,viewer)&&(t.accountId===account.id||t.toAccountId===account.id))&&<Empty variant="panel">هنوز تراکنشی برای این حساب ثبت نشده است.</Empty>}</Surface></>:<div className="loan-cards">{accounts.map(a=><CollectionPreview key={a.id} kind="account" name={a.name} amount={<bdi className="account-expense-amount" dir="ltr">{expenseText(a)}</bdi>} footer={<><span>مجموع هزینه‌ها</span><span>{a.type}</span><span>{a.visibility==='shared'?'مشترک':'شخصی'}</span></>} onClick={()=>{setSelected(a.id);setShowAll(false)}}/>)}{!accounts.length&&<Empty variant="panel">برای ثبت هزینه، ابتدا یک حساب اضافه کن.</Empty>}</div>;
+ const expenseText = (a: Account) => nativeMoney(accountExpenseTotal(data.transactions, a.id, viewer, day), a.currency??'IRT', data.currencyDefinitions);
+ return account?<><FlowBack label="بازگشت به حساب‌ها" onBack={()=>setSelected('')}/><AccountEditor key={account.id+account.name} account={account} expenseText={expenseText(account)} change={change}/><Surface className="card module-card"><h2>{showAll?'همه تراکنش‌های این حساب':'تراکنش‌های اخیر این حساب'}</h2>{data.transactions.filter(t=>t.type!=='income'&&active(t)&&allowed(t,viewer)&&(t.accountId===account.id||t.toAccountId===account.id)).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,showAll?undefined:5).map(t=><Action type="button" variant="ghost" className="transaction-row" key={t.id} onClick={()=>onTransaction(t)}><span className="row-main"><strong title={t.title}>{t.title}</strong><small>{persianDate(t.date)}</small></span><span className="row-end"><strong>{money(t.amount)}</strong></span></Action>)}<Action type="button" variant="outline" className="full" onClick={()=>setShowAll(v=>!v)}>{showAll?'نمایش تراکنش‌های اخیر':'نمایش همه تراکنش‌های حساب'}</Action>{!data.transactions.some(t=>t.type!=='income'&&active(t)&&allowed(t,viewer)&&(t.accountId===account.id||t.toAccountId===account.id))&&<Empty variant="panel">هنوز تراکنشی برای این حساب ثبت نشده است.</Empty>}</Surface></>:<div className="loan-cards">{accounts.map(a=><CollectionPreview key={a.id} kind="account" name={a.name} amount={<bdi className="account-expense-amount" dir="ltr">{expenseText(a)}</bdi>} footer={<><span>هزینه‌های این ماه</span><span>{a.type}</span><span>{a.visibility==='shared'?'مشترک':'شخصی'}</span></>} onClick={()=>{setSelected(a.id);setShowAll(false)}}/>)}{!accounts.length&&<Empty variant="panel">برای ثبت هزینه، ابتدا یک حساب اضافه کن.</Empty>}</div>;
 }
 function AccountEditor({ account, expenseText, change }: { account: Account; expenseText: string; change: (d: FinanceData | ((d: FinanceData) => FinanceData)) => void }) {
  const {requestConfirmation,requestDialog}=useUIRequest();

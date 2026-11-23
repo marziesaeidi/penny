@@ -33,7 +33,7 @@ const tx = (extra: Partial<Transaction> = {}): Transaction => ({ id:'event', tit
 const balance = (d: FinanceData, id: string) => d.accounts.find(a=>a.id===id)!.balance;
 test('accounts show visible expenses as negative totals and reflect corrections', () => {
   let data = fixture();
-  const total = (id: string, viewer = 'مرزیه') => accountExpenseTotal(data.transactions, id, viewer);
+  const total = (id: string, viewer = 'مرزیه') => accountExpenseTotal(data.transactions, id, viewer, '2026-10-08');
   assert.equal(total('a'), 0);
   data = post(data, tx({ id:'first', amount:100000 }));
   assert.equal(total('a'), -100000);
@@ -49,6 +49,16 @@ test('accounts show visible expenses as negative totals and reflect corrections'
   assert.equal(total('b'), -150200);
   data = reverse(data, 'second');
   assert.equal(total('a'), 0);
+});
+test('account spending restarts on the first day of the Tehran Jalali month', () => {
+  const first = fromJalali('1405/08/01');
+  const previous = fromJalali('1405/07/30');
+  const transactions = [tx({ date:previous }), tx({ id:'new-month', date:first, amount:500 })];
+  const total = (day: string) => accountExpenseTotal(transactions, 'a', 'مرزیه', day);
+  const midnight = Date.parse(first + 'T00:00:00+03:30');
+  assert.equal(total(canonicalDay(new Date(midnight - 1))), -100);
+  assert.equal(accountExpenseTotal(transactions.slice(0, 1), 'a', 'مرزیه', canonicalDay(new Date(midnight))), 0);
+  assert.equal(total(canonicalDay(new Date(midnight))), -500);
 });
 class MemoryStorage {
   values = new Map<string,string>();
